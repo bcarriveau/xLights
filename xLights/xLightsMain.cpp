@@ -179,6 +179,7 @@ const long xLightsFrame::ID_PANEL2 = wxNewId();
 const long xLightsFrame::ID_BUTTON1 = wxNewId();
 const long xLightsFrame::ID_BUTTON2 = wxNewId();
 const long xLightsFrame::ID_BUTTON4 = wxNewId();
+const long xLightsFrame::ID_BUTTON12 = wxNewId();
 const long xLightsFrame::ID_BUTTON7 = wxNewId();
 const long xLightsFrame::ID_BUTTON8 = wxNewId();
 const long xLightsFrame::ID_STATICTEXT1 = wxNewId();
@@ -669,6 +670,8 @@ xLightsFrame::xLightsFrame(wxWindow* parent, wxWindowID id) : _sequenceElements(
     FlexGridSizerSetupControllers->AddGrowableCol(0);
     FlexGridSizerSetupControllers->AddGrowableRow(0);
     Panel2->SetSizer(FlexGridSizerSetupControllers);
+    FlexGridSizerSetupControllers->Fit(Panel2);
+    FlexGridSizerSetupControllers->SetSizeHints(Panel2);
     Panel5 = new wxPanel(SplitterWindowControllers, ID_PANEL6, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL, _T("ID_PANEL6"));
     FlexGridSizerSetupRight = new wxFlexGridSizer(0, 1, 0, 0);
     FlexGridSizerSetupRight->AddGrowableCol(0);
@@ -684,6 +687,9 @@ xLightsFrame::xLightsFrame(wxWindow* parent, wxWindowID id) : _sequenceElements(
     FlexGridSizerSetupControllerButtons->Add(ButtonUploadInput, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     ButtonUploadOutput = new wxButton(Panel5, ID_BUTTON4, _("Upload Output"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON4"));
     FlexGridSizerSetupControllerButtons->Add(ButtonUploadOutput, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    FPPConnect = new wxButton(Panel5, ID_BUTTON12, _("FPP Connect"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON12"));
+    FPPConnect->SetDefault();
+    FlexGridSizerSetupControllerButtons->Add(FPPConnect, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     ButtonOpen = new wxButton(Panel5, ID_BUTTON7, _("Open"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON7"));
     FlexGridSizerSetupControllerButtons->Add(ButtonOpen, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     ButtonControllerDelete = new wxButton(Panel5, ID_BUTTON8, _("Delete"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON8"));
@@ -692,17 +698,23 @@ xLightsFrame::xLightsFrame(wxWindow* parent, wxWindowID id) : _sequenceElements(
     FlexGridSizerSetupControllerButtons->Add(StaticTextDummy, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     FlexGridSizerSetupRight->Add(FlexGridSizerSetupControllerButtons, 1, wxALL|wxEXPAND, 5);
     Panel5->SetSizer(FlexGridSizerSetupRight);
+    FlexGridSizerSetupRight->Fit(Panel5);
+    FlexGridSizerSetupRight->SetSizeHints(Panel5);
     SplitterWindowControllers->SplitVertically(Panel2, Panel5);
     SplitterWindowControllers->SetSashPosition(1000);
     FlexGridSizerNetworks->Add(SplitterWindowControllers, 1, wxALL|wxEXPAND, 5);
     StaticBoxSizer2->Add(FlexGridSizerNetworks, 1, wxALL|wxEXPAND, 5);
     FlexGridSizerSetup->Add(StaticBoxSizer2, 1, wxALL|wxEXPAND, 5);
     PanelSetup->SetSizer(FlexGridSizerSetup);
+    FlexGridSizerSetup->Fit(PanelSetup);
+    FlexGridSizerSetup->SetSizeHints(PanelSetup);
     PanelPreview = new wxPanel(Notebook1, ID_PANEL_PREVIEW, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL, _T("ID_PANEL_PREVIEW"));
     FlexGridSizerPreview = new wxFlexGridSizer(1, 1, 0, 0);
     FlexGridSizerPreview->AddGrowableCol(0);
     FlexGridSizerPreview->AddGrowableRow(0);
     PanelPreview->SetSizer(FlexGridSizerPreview);
+    FlexGridSizerPreview->Fit(PanelPreview);
+    FlexGridSizerPreview->SetSizeHints(PanelPreview);
     PanelSequencer = new wxPanel(Notebook1, XLIGHTS_SEQUENCER_TAB, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL|wxWANTS_CHARS, _T("XLIGHTS_SEQUENCER_TAB"));
     m_mgr = new wxAuiManager(PanelSequencer, wxAUI_MGR_ALLOW_FLOATING|wxAUI_MGR_DEFAULT);
     Notebook1->AddPage(PanelSetup, _("Controllers"), true);
@@ -720,11 +732,15 @@ xLightsFrame::xLightsFrame(wxWindow* parent, wxWindowID id) : _sequenceElements(
     ProgressBar = new wxGauge(Panel1, ID_GAUGE1, 100, wxDefaultPosition, wxDLG_UNIT(Panel1,wxSize(100,-1)), 0, wxDefaultValidator, _T("ID_GAUGE1"));
     GaugeSizer->Add(ProgressBar, 0, wxEXPAND, 0);
     Panel1->SetSizer(GaugeSizer);
+    GaugeSizer->Fit(Panel1);
+    GaugeSizer->SetSizeHints(Panel1);
     StatusBarSizer->Add(Panel1, wxGBPosition(0, 1), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
     FileNameText = new wxStaticText(AUIStatusBar, ID_STATICTEXT7, _("Label"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT7"));
     StatusBarSizer->Add(FileNameText, wxGBPosition(0, 2), wxDefaultSpan, wxALL|wxEXPAND, 2);
     StatusBarSizer->AddGrowableRow(0);
     AUIStatusBar->SetSizer(StatusBarSizer);
+    StatusBarSizer->Fit(AUIStatusBar);
+    StatusBarSizer->SetSizeHints(AUIStatusBar);
     MainAuiManager->AddPane(AUIStatusBar, wxAuiPaneInfo().Name(_T("Status Bar")).DefaultPane().Caption(_("Status bar")).CaptionVisible(false).CloseButton(false).Bottom().DockFixed().Dockable(false).Floatable(false).FloatingPosition(wxPoint(0,0)).FloatingSize(wxSize(0,0)).Movable(false).PaneBorder(false));
     MainAuiManager->Update();
     MenuBar = new wxMenuBar();
@@ -1046,6 +1062,7 @@ xLightsFrame::xLightsFrame(wxWindow* parent, wxWindowID id) : _sequenceElements(
     Connect(ID_BUTTON1,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&xLightsFrame::OnButtonVisualiseClick);
     Connect(ID_BUTTON2,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&xLightsFrame::OnButtonUploadInputClick);
     Connect(ID_BUTTON4,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&xLightsFrame::OnButtonUploadOutputClick);
+    Connect(ID_BUTTON12,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&xLightsFrame::OnMenuItem_FPP_ConnectSelected);
     Connect(ID_BUTTON7,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&xLightsFrame::OnButtonOpenClick);
     Connect(ID_BUTTON8,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&xLightsFrame::OnButtonControllerDeleteClick);
     m_mgr->Connect(wxEVT_AUI_PANE_CLOSE,(wxObjectEventFunction)&xLightsFrame::OnPaneClose,0,this);
@@ -9823,7 +9840,7 @@ void xLightsFrame::SetDefaultSeqView(const wxString& view)
     //if (_sequenceViewManager.GetViewIndex(view) == -1) {
     //    return;
     //}
-    
+
     _defaultSeqView = view;
     SetXmlSetting("defaultSeqView", view);
     UnsavedRgbEffectsChanges = true;

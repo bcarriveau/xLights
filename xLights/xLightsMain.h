@@ -662,6 +662,7 @@ public:
     static const long ID_BUTTON1;
     static const long ID_BUTTON2;
     static const long ID_BUTTON4;
+    static const long ID_BUTTON12;
     static const long ID_BUTTON7;
     static const long ID_BUTTON8;
     static const long ID_STATICTEXT1;
@@ -810,6 +811,7 @@ public:
     wxButton* ButtonUploadOutput;
     wxButton* ButtonVisualise;
     wxButton* Button_CheckShowFolderTemporarily;
+    wxButton* FPPConnect;
     wxChoice* ChoiceParm1;
     wxChoice* ChoiceParm2;
     wxFlexGridSizer* FlexGridSizerSetupControllerButtons;
