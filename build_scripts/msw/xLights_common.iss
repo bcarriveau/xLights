@@ -4,4 +4,4 @@
 #define MyTitleName "xLights" 
 #define Year 2021
 #define Version 23
-#define Other "preRelease"
+#define Other "withFPPbutton"
