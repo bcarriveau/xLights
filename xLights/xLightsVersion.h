@@ -18,7 +18,7 @@
 static const wxString xlights_version_string  = "2021.23";
 #endif
 static const wxString xlights_qualifier       = "-W FPP button"; // " BETA,ALPHA,PROD";
-static const wxString xlights_build_date      = "July 24, 2021";
+static const wxString xlights_build_date      = "July 25, 2021";
 	
 const wxString &GetBitness();
 wxString GetDisplayVersionString();
