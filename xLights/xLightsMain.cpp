@@ -448,7 +448,7 @@ void AddEffectToolbarButtons(EffectManager &manager, xlAuiToolBar *EffectsToolBa
 }
 
 xLightsFrame::xLightsFrame(wxWindow* parent, wxWindowID id) : _sequenceElements(this), AllModels(&_outputManager, this),
-    layoutPanel(nullptr), AllObjects(this), _xFadeSocket(nullptr), color_mgr(this), jobPool("RenderPool"), 
+    layoutPanel(nullptr), AllObjects(this), _xFadeSocket(nullptr), color_mgr(this), jobPool("RenderPool"),
     mainSequencer(nullptr), _presetSequenceElements(this)
 {
     static log4cpp::Category &logger_base = log4cpp::Category::getInstance(std::string("log_base"));
@@ -1455,6 +1455,9 @@ xLightsFrame::xLightsFrame(wxWindow* parent, wxWindowID id) : _sequenceElements(
     config->Read("xLightsPromptBatchRenderIssues", &_promptBatchRenderIssues, true);
     logger_base.debug("Prompt for issues during batch render: %s.", toStr( _promptBatchRenderIssues ));
 
+	config->Read("xLightsWarnGroupIssues", &_warnGroupIssues, true);
+	logger_base.debug("Warn for issues with Model Missing in groups: %s.", toStr(_warnGroupIssues));
+
     config->Read("xLightsExcludeAudioPkgSeq", &_excludeAudioFromPackagedSequences, false);
     logger_base.debug("Exclude Audio From Packaged Sequences: %s.", toStr( _excludeAudioFromPackagedSequences ));
 
@@ -1815,6 +1818,7 @@ xLightsFrame::~xLightsFrame()
     config->Write("xLightsBackupSubdirectories", _backupSubfolders);
     config->Write("xLightsExcludePresetsPkgSeq", _excludePresetsFromPackagedSequences);
     config->Write("xLightsPromptBatchRenderIssues", _promptBatchRenderIssues);
+	config->Write("xLightsWarnGroupIssues", _warnGroupIssues);
     config->Write("xLightsExcludeAudioPkgSeq", _excludeAudioFromPackagedSequences);
     config->Write("xLightsShowACLights", _showACLights);
     config->Write("xLightsShowACRamps", _showACRamps);
