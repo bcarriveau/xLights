@@ -1455,6 +1455,9 @@ xLightsFrame::xLightsFrame(wxWindow* parent, wxWindowID id) : _sequenceElements(
     config->Read("xLightsPromptBatchRenderIssues", &_promptBatchRenderIssues, true);
     logger_base.debug("Prompt for issues during batch render: %s.", toStr( _promptBatchRenderIssues ));
 
+    config->Read("xLightsIgnoreVendorModelRecommendations", &_ignoreVendorModelRecommendations, false);
+    logger_base.debug("Ignore vendor model recommendations: %s.", toStr(_ignoreVendorModelRecommendations));
+
 	config->Read("xLightsWarnGroupIssues", &_warnGroupIssues, true);
 	logger_base.debug("Warn for issues with Model Missing in groups: %s.", toStr(_warnGroupIssues));
 
@@ -1818,7 +1821,8 @@ xLightsFrame::~xLightsFrame()
     config->Write("xLightsBackupSubdirectories", _backupSubfolders);
     config->Write("xLightsExcludePresetsPkgSeq", _excludePresetsFromPackagedSequences);
     config->Write("xLightsPromptBatchRenderIssues", _promptBatchRenderIssues);
-	config->Write("xLightsWarnGroupIssues", _warnGroupIssues);
+    config->Write("xLightsIgnoreVendorModelRecommendations", _ignoreVendorModelRecommendations);
+    config->Write("xLightsWarnGroupIssues", _warnGroupIssues);
     config->Write("xLightsExcludeAudioPkgSeq", _excludeAudioFromPackagedSequences);
     config->Write("xLightsShowACLights", _showACLights);
     config->Write("xLightsShowACRamps", _showACRamps);
