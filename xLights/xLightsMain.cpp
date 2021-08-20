@@ -448,9 +448,10 @@ void AddEffectToolbarButtons(EffectManager& manager, xlAuiToolBar* EffectsToolBa
     EffectsToolBar->Realize();
 }
 
-xLightsFrame::xLightsFrame(wxWindow* parent, wxWindowID id) : _sequenceElements(this), AllModels(&_outputManager, this),
-    AllObjects(this), jobPool("RenderPool"), color_mgr(this),
-    _presetSequenceElements(this)
+xLightsFrame::xLightsFrame(wxWindow* parent, wxWindowID id) : 
+    _sequenceElements(this), AllModels(&_outputManager, this),
+    jobPool("RenderPool"), AllObjects(this),
+    _presetSequenceElements(this), color_mgr(this)
 {
     static log4cpp::Category &logger_base = log4cpp::Category::getInstance(std::string("log_base"));
     logger_base.debug("xLightsFrame being constructed.");
@@ -476,6 +477,8 @@ xLightsFrame::xLightsFrame(wxWindow* parent, wxWindowID id) : _sequenceElements(
     Bind(EVT_SELECTED_EFFECT_CHANGED, &xLightsFrame::SelectedEffectChanged, this);
     Bind(EVT_RENDER_RANGE, &xLightsFrame::RenderRange, this);
     wxHTTP::Initialize();
+
+    logger_base.debug("AA");
 
     //(*Initialize(xLightsFrame)
     wxBoxSizer* BoxSizer1;
@@ -1173,6 +1176,9 @@ xLightsFrame::xLightsFrame(wxWindow* parent, wxWindowID id) : _sequenceElements(
     Connect(wxEVT_SIZE,(wxObjectEventFunction)&xLightsFrame::OnResize);
     //*)
 
+    logger_base.debug("BB");
+
+    logger_base.debug("xLightsFrame constructor UI code done.");
 
     GaugeSizer->Fit(Panel1);
     GaugeSizer->SetSizeHints(Panel1);
@@ -1180,12 +1186,9 @@ xLightsFrame::xLightsFrame(wxWindow* parent, wxWindowID id) : _sequenceElements(
     StatusBarSizer->SetSizeHints(AUIStatusBar);
 
     Connect(wxID_ANY, wxEVT_CHAR_HOOK, wxKeyEventHandler(xLightsFrame::OnCharHook), nullptr, this);
-//    Connect(ID_LISTCTRL_NETWORKS, wxEVT_CONTEXT_MENU, (wxObjectEventFunction)& xLightsFrame::OnGridNetworkRClick);
 
     // Suppress OSX display of a warning when reading config ... "entry %s appears more than once in group '%s'
     wxLogNull logNo;
-
-    logger_base.debug("xLightsFrame constructor UI code done.");
 
     //need to direct these menu items to different places depending on what is active
     Connect(wxID_UNDO, wxEVT_MENU,(wxObjectEventFunction)&xLightsFrame::DoMenuAction);
