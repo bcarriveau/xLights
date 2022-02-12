@@ -832,6 +832,16 @@
 																			<option>1</option>
 																		</object>
 																		<object class="sizeritem">
+																			<object class="wxButton" name="ID_BUTTON12" variable="FPPConnect" member="yes">
+																				<label>FPP Connect</label>
+																				<default>1</default>
+																				<handler function="OnMenuItem_FPP_ConnectSelected" entry="EVT_BUTTON" />
+																			</object>
+																			<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+																			<border>5</border>
+																			<option>1</option>
+																		</object>
+																		<object class="sizeritem">
 																			<object class="wxButton" name="ID_BUTTON7" variable="ButtonOpen" member="yes">
 																				<label>Open</label>
 																				<handler function="OnButtonOpenClick" entry="EVT_BUTTON" />
