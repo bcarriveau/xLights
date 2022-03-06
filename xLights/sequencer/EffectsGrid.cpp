@@ -133,10 +133,14 @@ std::string findDataEffect::GetName() const
             return e->GetName();
         } else if (e->GetType() == ElementType::ELEMENT_TYPE_SUBMODEL) {
             SubModelElement* sm = dynamic_cast<SubModelElement*>(e);
-            return sm->GetModelElement()->GetName();
+            if (sm != nullptr) {
+                return sm->GetModelElement()->GetName();
+            }
         } else if (e->GetType() == ElementType::ELEMENT_TYPE_STRAND) {
             StrandElement* se = dynamic_cast<StrandElement*>(e);
-            return se->GetModelName();
+            if (se != nullptr) {
+                return se->GetModelName();
+            }
         }
     } else if (dl != nullptr) {
         return dl->GetName() + " " + dl->GetSource();
@@ -153,7 +157,6 @@ std::string findDataEffect::GetStrandSubmodel() const
             SubModelElement* sm = dynamic_cast<SubModelElement*>(e);
             return sm->GetName();
         } else if (e->GetType() == ElementType::ELEMENT_TYPE_STRAND) {
-            StrandElement* se = dynamic_cast<StrandElement*>(e);
             return wxString::Format("Strand %d", GetStrand() + 1).ToStdString();
         }
     } else if (dl != nullptr) {
@@ -414,9 +417,14 @@ void EffectsGrid::rightClick(wxMouseEvent& event)
         }
 
         if (ri->nodeIndex >= 0)             {
-            wxMenuItem* menu_effect_renderenable = mnuLayer.Append(ID_GRID_MNU_FINDEFFECTFORDATA, "Find Possible Source Effects");
+            wxMenuItem* menu_effect_findeffect = mnuLayer.Append(ID_GRID_MNU_FINDEFFECTFORDATA, "Find Possible Source Effects");
             _findDataRI = ri;
             _findDataMS = mTimeline->GetAbsoluteTimeMSfromPosition(event.GetX());
+
+            // we can only do this in the master view ... other views likely wont contain the effects the user needs to look at
+            if (mSequenceElements->GetCurrentView() != MASTER_VIEW) {
+                menu_effect_findeffect->Enable(false);
+            }
         }
 
         wxMenuItem* menu_effect_timing = mnuLayer.Append(ID_GRID_MNU_TIMING, "Timing");
@@ -493,9 +501,11 @@ uint32_t EffectsGrid::FindChannel(Element* element, int strandIndex, int nodeInd
         strandIndex -= dynamic_cast<StrandElement*>(element)->GetModelElement()->GetSubModelCount();
     }
     Model* model = xlights->GetModel(element->GetModelName());
-    channelsPerNode = model->GetChanCountPerNode();
-    uint32_t res =  model->GetChannelForNode(strandIndex, nodeIndex);
-    return res;
+    if (model != nullptr) {
+        channelsPerNode = model->GetChanCountPerNode();
+        return model->GetChannelForNode(strandIndex, nodeIndex);
+    }
+    return 0xFFFFFFFF;
 }
 
 void EffectsGrid::FindEffectsForData(uint32_t channel, uint8_t chans, uint32_t _findDataMS) const
@@ -544,29 +554,32 @@ void EffectsGrid::FindEffectsForData(uint32_t channel, uint8_t chans, uint32_t _
     std::vector<findDataEffect> actual;
     for (const auto& it : possible) {
         Model* model = xlights->GetModel(it.e->GetModelName());
-
-        if (it.el != nullptr) {
-            if (it.e->GetType() == ElementType::ELEMENT_TYPE_MODEL) {
-                if (model->ContainsChannel(channel, channel + chans - 1)) {
-                    actual.push_back(it);
+        if (model != nullptr) {
+            if (it.el != nullptr) {
+                if (it.e->GetType() == ElementType::ELEMENT_TYPE_MODEL) {
+                    if (model->ContainsChannel(channel, channel + chans - 1)) {
+                        actual.push_back(it);
+                    }
+                } else if (it.e->GetType() == ElementType::ELEMENT_TYPE_STRAND) {
+                    StrandElement* se = dynamic_cast<StrandElement*>(it.e);
+                    if (model->ContainsChannel(se->GetStrand(), channel, channel + chans - 1)) {
+                        actual.push_back(it);
+                    }
+                } else if (it.e->GetType() == ElementType::ELEMENT_TYPE_SUBMODEL) {
+                    SubModelElement* sm = dynamic_cast<SubModelElement*>(it.e);
+                    if (model->ContainsChannel(sm->GetName(), channel, channel + chans - 1)) {
+                        actual.push_back(it);
+                    }
                 }
-            } else if (it.e->GetType() == ElementType::ELEMENT_TYPE_STRAND) {
-                StrandElement* se = dynamic_cast<StrandElement*>(it.e);
-                if (model->ContainsChannel(se->GetStrand(), channel, channel + chans - 1)) {
-                    actual.push_back(it);
+            } else if (it.nl != nullptr) {
+                StrandElement* parent = dynamic_cast<StrandElement*>(it.nl->GetParentElement());
+                uint8_t channelsPerNode = 0;
+                uint32_t ch = FindChannel(parent->GetModelElement(), parent->GetStrand(), parent->GetNodeNumber(it.nl), channelsPerNode);
+                if (ch != 0xFFFFFFFF) {
+                    if (!(ch + channelsPerNode - 1 < channel || ch > channel + chans - 1)) {
+                        actual.push_back(it);
+                    }
                 }
-            } else if (it.e->GetType() == ElementType::ELEMENT_TYPE_SUBMODEL) {
-                SubModelElement* sm = dynamic_cast<SubModelElement*>(it.e);
-                if (model->ContainsChannel(sm->GetName(), channel, channel + chans - 1)) {
-                    actual.push_back(it);
-                }
-            }
-        } else if (it.nl != nullptr) {
-            StrandElement* parent = dynamic_cast<StrandElement*>(it.nl->GetParentElement());
-            uint8_t channelsPerNode = 0;
-            uint32_t ch = FindChannel(parent->GetModelElement(), parent->GetStrand(), parent->GetNodeNumber(it.nl), channelsPerNode);
-            if (!(ch + channelsPerNode - 1 < channel || ch > channel + chans - 1)) {
-                actual.push_back(it);
             }
         }
     }
@@ -574,7 +587,7 @@ void EffectsGrid::FindEffectsForData(uint32_t channel, uint8_t chans, uint32_t _
     auto& dls = xlights->CurrentSeqXmlFile->GetDataLayers();
     for (size_t i = 0; i < dls.GetNumLayers(); i++) {
         auto dl = dls.GetDataLayer(i);
-        if (dl->GetSource() != "<auto-generated>") {
+        if (dl != nullptr && dl->GetSource() != "<auto-generated>") {
             auto start = dl->GetChannelOffset();
             auto end = start + dl->GetNumChannels() - 1;
             if (!(end < channel || start > channel + chans)) {
@@ -641,14 +654,21 @@ void EffectsGrid::OnGridPopup(wxCommandEvent& event)
     else if (id == ID_GRID_MNU_FINDEFFECTFORDATA) {
         uint8_t chans = 0;
         uint32_t channel = FindChannel(_findDataRI->element, _findDataRI->strandIndex, _findDataRI->nodeIndex, chans);
-        int strandAdj = 0;
-        std::string parent;
-        if (_findDataRI->element->GetType() == ElementType::ELEMENT_TYPE_STRAND) {
-            strandAdj -= dynamic_cast<StrandElement*>(_findDataRI->element)->GetModelElement()->GetSubModelCount();
-            parent = dynamic_cast<StrandElement*>(_findDataRI->element)->GetModelElement()->GetName();
+        if (channel != 0xFFFFFFFF) {
+            int strandAdj = 0;
+            std::string parent;
+            if (_findDataRI->element->GetType() == ElementType::ELEMENT_TYPE_STRAND) {
+                strandAdj -= dynamic_cast<StrandElement*>(_findDataRI->element)->GetModelElement()->GetSubModelCount();
+                parent = dynamic_cast<StrandElement*>(_findDataRI->element)->GetModelElement()->GetName();
+            }
+            logger_base.debug("FIND EFFECTS IMPACTING NODE: Element: %s %s %s strand %d node %d -> channels %u-%u", (char*)_findDataRI->element->GetTypeDescription().c_str(), (char*)_findDataRI->element->GetName().c_str(), (char*)parent.c_str(), _findDataRI->strandIndex + 1 + strandAdj, _findDataRI->nodeIndex + 1, channel + 1, channel + chans);
+            FindEffectsForData(channel, chans, _findDataMS);
         }
-        logger_base.debug("FIND EFFECTS IMPACTING NODE: Element: %s %s %s strand %d node %d -> channels %u-%u", (char*)_findDataRI->element->GetTypeDescription().c_str(), (char*)_findDataRI->element->GetName().c_str(), (char*)parent.c_str(), _findDataRI->strandIndex + 1 + strandAdj, _findDataRI->nodeIndex + 1, channel + 1, channel + chans);
-        FindEffectsForData(channel, chans, _findDataMS);
+        else {
+            std::vector<findDataEffect> actual;
+            xlights->ShowDataFindPanel();
+            xlights->GetFindDataPanel()->UpdateEffects(actual, this);
+        }
     }
     else if (id == ID_GRID_MNU_RENDERENABLE) {
         logger_base.debug("OnGridPopup - RENDERENABLE");
@@ -895,7 +915,7 @@ Effect* EffectsGrid::FillRandomEffects()
             if (timingIndex1 > timingIndex2) {
                 std::swap(timingIndex1, timingIndex2);
             }
-            Effect* lastEffect = nullptr;
+//            Effect* lastEffect = nullptr;
             if (timingIndex1 != -1 && timingIndex2 != -1) {
                 wxProgressDialog prog("Generating random effects", "This may take some time", 100, this, wxPD_APP_MODAL | wxPD_AUTO_HIDE);
                 prog.Show();
@@ -921,7 +941,7 @@ Effect* EffectsGrid::FillRandomEffects()
                                         false);
                                     if (res == nullptr) res = ef;
                                     if (ef != nullptr) {
-                                        lastEffect = ef;
+//                                        lastEffect = ef;
                                         mSequenceElements->get_undo_mgr().CaptureAddedEffect(effectLayer->GetParentElement()->GetModelName(), effectLayer->GetIndex(), ef->GetID());
                                         RaiseSelectedEffectChanged(ef, true, false);
                                         mSelectedEffect = ef;
@@ -2018,8 +2038,8 @@ Effect* EffectsGrid::ACDraw(ACTYPE type, ACSTYLE style, ACMODE mode, int intensi
                 sendRenderEvent(el->GetParentElement()->GetModelName(), startMS, endMS);
             }
             break;
-            case SELECT:
-            case NILTYPEOVERRIDE:
+            case ACTYPE::SELECT:
+            case ACTYPE::NILTYPEOVERRIDE:
                 break;
             }
 
@@ -5927,8 +5947,8 @@ void EffectsGrid::DrawEffects(xlGraphicsContext *ctx)
                     drawIcon = 0;
                 }
 
-                if (mode != SCREEN_L_R_OFF) {
-                    if (mode == SCREEN_L_R_ON || mode == SCREEN_L_ON) {
+                if (mode != EFFECT_SCREEN_MODE::SCREEN_L_R_OFF) {
+                    if (mode == EFFECT_SCREEN_MODE::SCREEN_L_R_ON || mode == EFFECT_SCREEN_MODE::SCREEN_L_ON) {
                         if (effectIndex > 0) {
                             // Draw left line if effect has different start time then previous effect or
                             // previous effect was not selected, or only left was selected
@@ -5945,13 +5965,13 @@ void EffectsGrid::DrawEffects(xlGraphicsContext *ctx)
                     }
 
                     // Draw Right line
-                    if (mode == SCREEN_L_R_ON || mode == SCREEN_R_ON) {
+                    if (mode == EFFECT_SCREEN_MODE::SCREEN_L_R_ON || mode == EFFECT_SCREEN_MODE::SCREEN_R_ON) {
                         linesRight->AddVertex(x2, y1);
                         linesRight->AddVertex(x2, y2);
                     }
 
                     // Draw horizontal
-                    if (mode != SCREEN_L_R_OFF) {
+                    if (mode != EFFECT_SCREEN_MODE::SCREEN_L_R_OFF) {
                         if (drawIcon) {
                             if (x > (DEFAULT_ROW_HEADING_HEIGHT + 4)) {
                                 double sz = (DEFAULT_ROW_HEADING_HEIGHT - 6.0) / (2.0 * drawIcon) + 1.0;
@@ -6096,7 +6116,7 @@ void EffectsGrid::DrawTimingEffects(int row)
     for (int effectIndex = 0; effectIndex < effectLayer->GetEffectCount(); effectIndex++) {
         Effect *eff = effectLayer->GetEffect(effectIndex);
 
-        EFFECT_SCREEN_MODE mode = SCREEN_L_R_OFF;
+        EFFECT_SCREEN_MODE mode = EFFECT_SCREEN_MODE::SCREEN_L_R_OFF;
 
         int y1 = (row*DEFAULT_ROW_HEADING_HEIGHT) + 4;
         int y2 = ((row + 1)*DEFAULT_ROW_HEADING_HEIGHT) - 4;
@@ -6123,9 +6143,9 @@ void EffectsGrid::DrawTimingEffects(int row)
                 eff->GetSelected() == EFFECT_LT_SELECTED ? timingEffLines : selectedLines;
         }
 
-        if (mode != SCREEN_L_R_OFF) {
+        if (mode != EFFECT_SCREEN_MODE::SCREEN_L_R_OFF) {
             // Draw Left line
-            if (mode == SCREEN_L_R_ON || mode == SCREEN_L_ON) {
+            if (mode == EFFECT_SCREEN_MODE::SCREEN_L_R_ON || mode == EFFECT_SCREEN_MODE::SCREEN_L_ON) {
                 if (effectIndex > 0) {
                     // Draw left line if effect has different start time then previous effect or
                     // previous effect was not selected, or only left was selected
@@ -6146,7 +6166,7 @@ void EffectsGrid::DrawTimingEffects(int row)
                 }
             }
             // Draw Right line
-            if (mode == SCREEN_L_R_ON || mode == SCREEN_R_ON) {
+            if (mode == EFFECT_SCREEN_MODE::SCREEN_L_R_ON || mode == EFFECT_SCREEN_MODE::SCREEN_R_ON) {
                 linesRight->AddVertex(x2, y1);
                 linesRight->AddVertex(x2, y2);
                 if (element->GetActive() && ri->layerIndex == 0) {
@@ -6155,7 +6175,7 @@ void EffectsGrid::DrawTimingEffects(int row)
                 }
             }
             // Draw horizontal
-            if (mode != SCREEN_L_R_OFF) {
+            if (mode != EFFECT_SCREEN_MODE::SCREEN_L_R_OFF) {
                 int half_width = (x2 - x1) / 2;
                 if (eff->GetEffectName() != "" && (x2 - x1) > 20) {
                     int max_width = x2 - x1 - 18;
