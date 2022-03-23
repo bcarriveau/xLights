@@ -28,7 +28,7 @@ class LuaRunner
 public:
     explicit LuaRunner(xLightsFrame* frame);
 
-    bool Run_Script(wxString const& filepath, std::function<void(std::string const& msg)> SendResponce);
+    bool Run_Script(wxString const& filepath, std::function<void(std::string const& msg)> SendResponse);
 
     [[nodiscard]] std::string GetUserScriptFolder() const;
     [[nodiscard]] static std::string GetSystemScriptFolder();
@@ -42,6 +42,7 @@ public:
     [[nodiscard]] sol::object JSONToTable(std::string const& json, sol::this_state s) const;
     [[nodiscard]] std::list<std::string> SplitString(std::string const& text, char const& delimiter) const;
     [[nodiscard]] std::string JoinString(sol::object const& list, char const& delimiter) const;
+    [[nodiscard]] std::string TableToJSON(sol::object const& items) const;
 
 private:
     xLightsFrame* _frame = nullptr;
@@ -50,5 +51,7 @@ private:
     [[nodiscard]] wxString CommandtoString(std::string const& cmd, std::map<std::string, std::string> const& parms) const;
     [[nodiscard]] sol::object getObjectType(wxJSONValue const& val, sol::state_view lua) const;
     [[nodiscard]] wxArrayString getArrayString(sol::object const& items) const;
-    void SendObjResponce(sol::object const& val, std::function<void(std::string const& msg)> SendResponce) const;
+    void SendObjResponse(sol::object const& val, std::function<void(std::string const& msg)> SendResponse) const;
+    void ObjectToJSON(sol::object const& items, wxJSONValue& json) const;
+    bool is_integer(double n) const;
 };
