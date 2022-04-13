@@ -964,6 +964,19 @@
       <Filter>Models</Filter>
     </ClCompile>
     <ClCompile Include="SearchPanel.cpp" />
+    <ClCompile Include="effects\SketchEffect.cpp">
+      <Filter>Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="effects\SketchPanel.cpp">
+      <Filter>Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="effects\SketchEffectDrawing.cpp">
+      <Filter>Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="effects\assist\SketchAssistPanel.cpp" />
+    <ClCompile Include="effects\assist\SketchCanvasPanel.cpp">
+      <Filter>Effects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BatchRenderDialog.h" />
@@ -1934,6 +1947,19 @@
       <Filter>Models</Filter>
     </ClInclude>
     <ClInclude Include="SearchPanel.h" />
+    <ClInclude Include="effects\SketchEffect.h">
+      <Filter>Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="effects\SketchPanel.h">
+      <Filter>Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="effects\SketchEffectDrawing.h">
+      <Filter>Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="effects\assist\SketchAssistPanel.h" />
+    <ClInclude Include="effects\assist\SketchCanvasPanel.h">
+      <Filter>Effects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Models">

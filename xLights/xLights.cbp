@@ -976,6 +976,12 @@
 		<Unit filename="effects/SingleStrandEffect.h" />
 		<Unit filename="effects/SingleStrandPanel.cpp" />
 		<Unit filename="effects/SingleStrandPanel.h" />
+		<Unit filename="effects/SketchEffect.cpp" />
+		<Unit filename="effects/SketchEffect.h" />
+		<Unit filename="effects/SketchEffectDrawing.cpp" />
+		<Unit filename="effects/SketchEffectDrawing.h" />
+		<Unit filename="effects/SketchPanel.cpp" />
+		<Unit filename="effects/SketchPanel.h" />
 		<Unit filename="effects/SnowflakesEffect.cpp" />
 		<Unit filename="effects/SnowflakesEffect.h" />
 		<Unit filename="effects/SnowflakesPanel.cpp" />
@@ -1036,6 +1042,10 @@
 		<Unit filename="effects/assist/AssistPanel.h" />
 		<Unit filename="effects/assist/PicturesAssistPanel.cpp" />
 		<Unit filename="effects/assist/PicturesAssistPanel.h" />
+		<Unit filename="effects/assist/SketchAssistPanel.cpp" />
+		<Unit filename="effects/assist/SketchAssistPanel.h" />
+		<Unit filename="effects/assist/SketchCanvasPanel.cpp" />
+		<Unit filename="effects/assist/SketchCanvasPanel.h" />
 		<Unit filename="effects/assist/xlGridCanvasEmpty.cpp" />
 		<Unit filename="effects/assist/xlGridCanvasEmpty.h" />
 		<Unit filename="effects/assist/xlGridCanvasMorph.cpp" />

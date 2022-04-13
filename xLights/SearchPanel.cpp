@@ -60,7 +60,7 @@ SearchPanel::SearchPanel(SequenceElements* elements, MainSequencer* sequencer, w
 	FlexGridSizer1->Add(CheckBox_Search_Regex, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxFIXED_MINSIZE, 5);
 	StaticText2 = new wxStaticText(this, ID_STATICTEXT2, _("Search:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT2"));
 	FlexGridSizer1->Add(StaticText2, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-	TextCtrlSearch = new wxTextCtrl(this, ID_TEXTCTRL_SEARCH, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_TEXTCTRL_SEARCH"));
+	TextCtrlSearch = new wxTextCtrl(this, ID_TEXTCTRL_SEARCH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator, _T("ID_TEXTCTRL_SEARCH"));
 	FlexGridSizer1->Add(TextCtrlSearch, 1, wxALL|wxEXPAND, 5);
 	Button_Search_Find = new wxButton(this, ID_BUTTON_SEARCH_FIND, _("Find"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_SEARCH_FIND"));
 	FlexGridSizer1->Add(Button_Search_Find, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxFIXED_MINSIZE, 5);
@@ -247,23 +247,21 @@ bool SearchPanel::ContainsSetting(Effect* eff, std::string const& search, bool r
         if (regex) {
             wxRegEx re(search, wxRE_ADVANCED | wxRE_NEWLINE);
             return re.Matches(val);
-        } 
+        }
         return ::Contains(::Lower(val), ::Lower(search));
     };
 
     for (auto [key, setting] : eff->GetSettings()) {
-        if (compare(setting)) {
-            value = key;
-            value.append("=");
-            value.append(setting);
+        std::string cmpvalue{ key + "=" + setting };
+        if (compare(cmpvalue)) {
+            value = cmpvalue;
             return true;
         }
     }
     for (auto [key, setting] : eff->GetPaletteMap()) {
-        if (compare(setting)) {
-            value = key;
-            value.append("=");
-            value.append(setting);
+        std::string cmpvalue{ key + "=" + setting };
+        if (compare(cmpvalue)) {
+            value = cmpvalue;
             return true;
         }
     }

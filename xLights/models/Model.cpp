@@ -125,19 +125,8 @@ static const std::string MODEL_PREVIEW_CACHE_2D("ModelPreviewCache3D");
 static const std::string MODEL_PREVIEW_CACHE_3D("ModelPreviewCache2D");
 
 
-Model::Model(const ModelManager& manager) : modelDimmingCurve(nullptr),
-parm1(0), parm2(0), parm3(0), pixelStyle(1), pixelSize(2), transparency(0), blackTransparency(0),
-StrobeRate(0), modelManager(manager), CouldComputeStartChannel(false), maxVertexCount(0),
-rgbwHandlingType(0), BufferDp(0), _controller(0), modelTagColour(*wxBLACK)
+Model::Model(const ModelManager& manager) : modelManager(manager)
 {
-    // These member vars were not initialised so give them some defaults.
-    BufferHt = 0;
-    BufferWi = 0;
-    IsLtoR = true;
-    isBotToTop = true;
-    SingleNode = false;
-    zeroBased = false;
-    SingleChannel = false;
 }
 
 Model::~Model()
@@ -2262,9 +2251,10 @@ void Model::ParseStateInfo(wxXmlNode *f, std::map<std::string, std::map<std::str
     }
     wxXmlAttribute *att = f->GetAttributes();
     while (att != nullptr) {
-        if (att->GetName() != "Name")
-        {
+        if (att->GetName() != "Name") {
+            if (att->GetValue() != "") { // we only save non default values to keep xml file small
                 stateInfo[name][att->GetName().ToStdString()] = att->GetValue();
+            }
         }
         att = att->GetNext();
     }

@@ -337,6 +337,11 @@ bool ControllerCaps::SupportsUniversePerString() const
     return DoesXmlNodeExist(_config, "SupportsUniversePerString");
 }
 
+bool ControllerCaps::DMXAfterPixels() const
+{
+    return DoesXmlNodeExist(_config, "DMXAfterPixels");
+}
+
 bool ControllerCaps::SupportsMultipleSimultaneousOutputProtocols() const {
 
     return DoesXmlNodeExist(_config, "SupportsMultipleSimultaneousOutputProtocols");
@@ -380,6 +385,16 @@ bool ControllerCaps::SupportsPixelPortBrightness() const {
 bool ControllerCaps::SupportsPixelPortGamma() const {
 
     return SupportsPixelPortCommonSettings() || DoesXmlNodeExist(_config, "SupportsPixelPortGamma");
+}
+
+bool ControllerCaps::SupportsDefaultGamma() const
+{
+    return DoesXmlNodeExist(_config, "SupportsDefaultGamma");
+}
+
+bool ControllerCaps::SupportsDefaultBrightness() const
+{
+    return DoesXmlNodeExist(_config, "SupportsDefaultBrightness");
 }
 
 bool ControllerCaps::SupportsPixelPortColourOrder() const {
