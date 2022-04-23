@@ -56,10 +56,16 @@ void SketchEffect::Render(Effect* /*effect*/, SettingsMap& settings, RenderBuffe
     double progress = buffer.GetEffectTimeIntervalPosition(1.f);
 
     std::string sketchDef = settings.Get("TEXTCTRL_SketchDef", "");
-    double drawPercentage = GetValueCurveDouble("DrawPercentage", 40, settings, progress, 1, 100, buffer.GetStartTimeMS(), buffer.GetEndTimeMS());
-    int thickness = GetValueCurveInt("Thickness", 1, settings, progress, 1, 10, buffer.GetStartTimeMS(), buffer.GetEndTimeMS());
+    double drawPercentage = GetValueCurveDouble("DrawPercentage", SketchPanel::DrawPercentageDef, settings, progress,
+                                                SketchPanel::DrawPercentageMin, SketchPanel::DrawPercentageMax,
+                                                buffer.GetStartTimeMS(), buffer.GetEndTimeMS());
+    int thickness = GetValueCurveInt("Thickness", SketchPanel::ThicknessDef, settings, progress,
+                                     SketchPanel::ThicknessMin, SketchPanel::ThicknessMax,
+                                     buffer.GetStartTimeMS(), buffer.GetEndTimeMS());
     bool motionEnabled = settings.GetBool("CHECKBOX_MotionEnabled");
-    int motionPercentage = settings.GetInt("SLIDER_MotionPercentage", 100);
+    int motionPercentage = GetValueCurveInt("MotionPercentage", SketchPanel::MotionPercentageDef, settings, progress,
+                                            SketchPanel::MotionPercentageMin, SketchPanel::MotionPercentageMax,
+                                            buffer.GetStartTimeMS(), buffer.GetEndTimeMS());
 
     xlColorVector colors(buffer.GetColorCount());
     for (size_t i = 0; i < buffer.GetColorCount(); ++i)
@@ -118,14 +124,20 @@ void SketchEffect::SetDefaultParameters()
 
     SetTextValue(p->TextCtrl_SketchDef, SketchEffectSketch::DefaultSketchString());
 
-    p->BitmapButton_Thickness->SetActive(false);
     p->BitmapButton_DrawPercentage->SetActive(false);
+    p->BitmapButton_Thickness->SetActive(false);
+    p->BitmapButton_MotionPercentage->SetActive(false);
 
     SetCheckBoxValue(p->CheckBox_MotionEnabled, false);
 
-    SetSliderValue(p->Slider_DrawPercentage, 40);
-    SetSliderValue(p->Slider_Thickness, 1);
-    SetSliderValue(p->Slider_MotionPercentage, 100);
+    SetSliderValue(p->Slider_SketchBackgroundOpacity, 0x30);
+    SetSliderValue(p->Slider_DrawPercentage, SketchPanel::DrawPercentageDef);
+    SetSliderValue(p->Slider_Thickness, SketchPanel::ThicknessDef);
+    SetSliderValue(p->Slider_MotionPercentage, SketchPanel::MotionPercentageDef);
+
+    p->FilePicker_SketchBackground->SetFileName(wxFileName());
+
+    p->ValidateWindow();
 }
 
 bool SketchEffect::needToAdjustSettings( const std::string& /*version*/ )
@@ -164,6 +176,9 @@ AssistPanel* SketchEffect::GetAssistPanel(wxWindow* parent, xLightsFrame* /*xl_f
     sketchAssistPanel->SetSketchUpdateCallback(lambda);
     //sketchAssistPanel->SetxLightsFrame(xl_frame);
     assistPanel->AddPanel(sketchAssistPanel, wxALL | wxEXPAND);
+
+    m_sketchAssistPanel = sketchAssistPanel;
+    updateSketchAssistBackground();
 
     return assistPanel;
 }
@@ -239,4 +254,15 @@ void SketchEffect::renderSketch(const SketchEffectSketch& sketch, wxImage& img, 
         }
         cumulativeLength += pathLength;
     }
+}
+
+void SketchEffect::updateSketchAssistBackground() const
+{
+    if (m_panel == nullptr || m_sketchAssistPanel == nullptr)
+        return;
+
+    wxString path(m_panel->FilePicker_SketchBackground->GetFileName().GetFullPath());
+    int opacity = m_panel->Slider_SketchBackgroundOpacity->GetValue();
+
+    m_sketchAssistPanel->UpdateSketchBackground(path, opacity);
 }

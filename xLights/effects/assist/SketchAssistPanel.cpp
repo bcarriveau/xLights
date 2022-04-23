@@ -1,11 +1,10 @@
 #include "SketchAssistPanel.h"
 #include "SketchCanvasPanel.h"
 
-#include <wx/filepicker.h>
+#include <wx/button.h>
 #include <wx/listbox.h>
 #include <wx/menu.h>
 #include <wx/sizer.h>
-#include <wx/slider.h>
 #include <wx/statbox.h>
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
@@ -27,6 +26,7 @@ BEGIN_EVENT_TABLE(SketchAssistPanel, wxPanel)
 END_EVENT_TABLE()
 
 long SketchAssistPanel::ID_MENU_Delete = wxNewId();
+long SketchAssistPanel::ID_MENU_Reverse = wxNewId();
 
 SketchAssistPanel::SketchAssistPanel(wxWindow* parent, wxWindowID id /*wxID_ANY*/, const wxPoint& pos /*wxDefaultPosition*/, const wxSize& size /*wxDefaultSize*/) :
     wxPanel(parent, id, pos, size)
@@ -38,9 +38,6 @@ SketchAssistPanel::SketchAssistPanel(wxWindow* parent, wxWindowID id /*wxID_ANY*
       pathUISizer (canvas, bg-image controls, and path/sketch controls)
       |\
       | canvasFrame (m_sketchCanvasPanel)
-      |\
-      | bgSizer (m_filePicker, m_bgAlphaSlider)
-      |
       |\
       | pathSketchCtrlsSizer
       | |\
@@ -61,12 +58,9 @@ SketchAssistPanel::SketchAssistPanel(wxWindow* parent, wxWindowID id /*wxID_ANY*
     mainSizer->AddGrowableCol(0);
     mainSizer->AddGrowableRow(0);
 
-    auto pathUISizer = new wxFlexGridSizer(3, 1, 5, 0);
+    auto pathUISizer = new wxFlexGridSizer(/*3*/2, 1, 5, 0);
     pathUISizer->AddGrowableRow(0);
     pathUISizer->AddGrowableCol(0);
-
-    auto bgSizer = new wxFlexGridSizer(1, 3, 0, 0);
-    bgSizer->AddGrowableCol(1);
 
     auto pathSketchCtrlsSizer = new wxFlexGridSizer(1, 3, 0, 5);
     auto sketchCtrlsSizer = new wxStaticBoxSizer(wxHORIZONTAL, this, "Sketch");
@@ -86,16 +80,6 @@ SketchAssistPanel::SketchAssistPanel(wxWindow* parent, wxWindowID id /*wxID_ANY*
     m_sketchCanvasPanel = new SketchCanvasPanel(this, canvasFrame, wxID_ANY, wxDefaultPosition, wxSize(400, 300));
     canvasFrameSizer->Add(m_sketchCanvasPanel, 1, wxALL | wxEXPAND);
     canvasFrame->SetSizer(canvasFrameSizer);
-
-    // background image controls
-    auto bgLabel = new wxStaticText(this, wxID_ANY, "Background:");
-    m_filePicker = new wxFilePickerCtrl(this, wxID_ANY, wxEmptyString, imgSelect, imgFilters, wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST | wxFLP_OPEN | wxFLP_USE_TEXTCTRL);
-    m_filePicker->GetTextCtrl()->SetEditable(false);
-    m_bgAlphaSlider = new wxSlider(this, wxID_ANY, m_bitmapAlpha, 0x00, 0xff);
-
-    bgSizer->Add(bgLabel, 1, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 2);
-    bgSizer->Add(m_filePicker, 1, wxALL | wxEXPAND, 2);
-    bgSizer->Add(m_bgAlphaSlider, 1, wxALL | wxEXPAND, 2);
 
     // path / sketch controls
     m_startPathBtn = new wxButton(this, wxID_ANY, "Start");
@@ -128,7 +112,6 @@ SketchAssistPanel::SketchAssistPanel(wxWindow* parent, wxWindowID id /*wxID_ANY*
     sketchUISizer->Add(pathsSizer, 1, wxALL | wxEXPAND, 5);
 
     pathUISizer->Add(canvasFrame, 1, wxALL | wxEXPAND, 5);
-    pathUISizer->Add(bgSizer, 1, wxALL | wxEXPAND);
     pathUISizer->Add(pathSketchCtrlsSizer, 1, wxALL | wxEXPAND, 5);
 
     mainSizer->Add(pathUISizer, 1, wxALL | wxEXPAND, 5);
@@ -136,8 +119,7 @@ SketchAssistPanel::SketchAssistPanel(wxWindow* parent, wxWindowID id /*wxID_ANY*
 
     SetSizer(mainSizer);
 
-    Connect(m_filePicker->GetId(), wxEVT_COMMAND_FILEPICKER_CHANGED, (wxObjectEventFunction)&SketchAssistPanel::OnFilePickerCtrl_FileChanged);
-    Connect(m_bgAlphaSlider->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, (wxObjectEventFunction)&SketchAssistPanel::OnSlider_BgAlphaChanged);
+    SetName("ID_PANEL_SKETCH_ASSIST");
 
     Connect(m_startPathBtn->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, (wxObjectEventFunction)&SketchAssistPanel::OnButton_StartPath);
     Connect(m_endPathBtn->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, (wxObjectEventFunction)&SketchAssistPanel::OnButton_EndPath);
@@ -228,21 +210,21 @@ void SketchAssistPanel::SelectLastPath()
     }
 }
 
-void SketchAssistPanel::OnFilePickerCtrl_FileChanged(wxCommandEvent& /*event*/)
+void SketchAssistPanel::UpdateSketchBackground(const wxString& imagePath, int opacity)
 {
-    wxImage img(m_filePicker->GetFileName().GetFullPath());
-    if (img.IsOk()) {
-        if (!img.HasAlpha())
-            img.InitAlpha();
+    if (imagePath == m_bgImagePath && opacity == m_bitmapAlpha)
+        return;
 
-        m_bgImage = img;
-        updateBgImage();
-    }
-}
+    wxImage img(imagePath);
+    if (!img.IsOk())
+        return;
 
-void SketchAssistPanel::OnSlider_BgAlphaChanged(wxCommandEvent& event)
-{
-    m_bitmapAlpha = static_cast<unsigned char>(m_bgAlphaSlider->GetValue());
+    if (!img.HasAlpha())
+        img.InitAlpha();
+
+    m_bgImagePath = imagePath;
+    m_bgImage = img;
+    m_bitmapAlpha = static_cast<unsigned char>(opacity);
     updateBgImage();
 }
 
@@ -296,9 +278,11 @@ void SketchAssistPanel::OnListBox_ContextMenu(wxContextMenuEvent& event)
         return;
 
     wxString str;
-    str.sprintf("Delete Path %d", 1 + m_pathIndexToDelete);
 
     wxMenu mnu;
+    str.sprintf("Reverse Path %d", 1 + m_pathIndexToDelete);
+    mnu.Append(ID_MENU_Reverse, str);
+    str.sprintf("Delete Path %d", 1 + m_pathIndexToDelete);
     mnu.Append(ID_MENU_Delete, str);
     mnu.Connect(wxEVT_MENU, (wxObjectEventFunction)&SketchAssistPanel::OnPopupCommand, nullptr, this);
     PopupMenu(&mnu);
@@ -306,9 +290,19 @@ void SketchAssistPanel::OnListBox_ContextMenu(wxContextMenuEvent& event)
 
 void SketchAssistPanel::OnPopupCommand(wxCommandEvent& event)
 {
-    if (event.GetId() == ID_MENU_Delete && m_pathIndexToDelete < m_sketch.pathCount()) {
-        m_sketch.deletePath(m_pathIndexToDelete);
+    if (m_pathIndexToDelete >= m_sketch.pathCount())
+        return;
+    bool update = false;
 
+    if (event.GetId() == ID_MENU_Delete) {
+        m_sketch.deletePath(m_pathIndexToDelete);
+        update = true;
+    } else if (event.GetId() == ID_MENU_Reverse) {
+        m_sketch.reversePath(m_pathIndexToDelete);
+        update = true;
+    }
+
+    if (update) {
         m_sketchCanvasPanel->ResetHandlesState();
 
         populatePathListBoxFromSketch();
