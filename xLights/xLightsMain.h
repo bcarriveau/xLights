@@ -62,6 +62,7 @@
 #include <windows.h>
 #endif
 
+#include "../common/xlBaseApp.h"
 #include "outputs/OutputManager.h"
 #include "PixelBuffer.h"
 #include "SequenceData.h"
@@ -275,7 +276,7 @@ private:
     int id;
 };
 
-class xLightsFrame: public wxFrame
+class xLightsFrame: public xlFrame
 {
 public:
 
@@ -338,7 +339,7 @@ public:
     void MarkEffectsFileDirty();
     void MarkModelsAsNeedingRender();
     void CheckUnsavedChanges();
-    void SetStatusText(const wxString &msg, int filename = 0);
+    void SetStatusText(const wxString &msg, int filename = 0) override;
     void SetStatusTextColor(const wxString &msg, const wxColor& colour);
 	std::string GetChannelToControllerMapping(int32_t channel);
     void GetControllerDetailsForChannel(int32_t channel, std::string& controllername, std::string& type, std::string& protocol, std::string& description, int32_t& channeloffset, std::string &ip, std::string& u, std::string& inactive, std::string& baud, int& start_universe, int& start_universe_channel);
@@ -385,7 +386,8 @@ public:
     void CreatePresetIcons();
     void ClearSequenceData();
     void LoadAudioData(xLightsXmlFile& xml_file);
-    void CreateDebugReport(wxDebugReportCompress *report, std::list<std::string> trc);
+    virtual void CreateDebugReport(xlCrashHandler* crashHandler) override;
+    virtual std::string GetCurrentDir() const override { return CurrentDir.ToStdString(); }
     wxString GetThreadStatusReport();
     void PushTraceContext();
     void PopTraceContext();
@@ -610,7 +612,6 @@ private :
 	void SetEffectAssistWindowState(bool show);
     void UpdateEffectAssistWindow(Effect* effect, RenderableEffect* ren_effect);
     void MaybePackageAndSendDebugFiles();
-    void SendReport(const wxString &loc, wxDebugReportCompress &report);
     void AddDebugFilesToReport(wxDebugReport &report);
 
 public:
@@ -1210,7 +1211,7 @@ public:
     bool DisableOutputs();
     void CycleOutputsIfOn();
 
-    bool ForceEnableOutputs();
+    bool ForceEnableOutputs(bool startTimer = true);
     void EnableNetworkChanges();
     void InitEffectsPanel(EffectsPanel* panel);
     void LogPerspective(const wxString& perspective) const;
