@@ -11,6 +11,34 @@ Issue Tracker is found here: www.github.com/smeighan/xLights/issues
 
 XLIGHTS/NUTCRACKER RELEASE NOTES
 ---------------------------------
+2022.12 June 7, 2022
+   -- enh (scott) Move ScottNation controllers under their own vendor
+   -- enh (keith) Rewrite custom model generation to use a faster algorithm
+   -- enh (scott) Add DMX colour wheel support
+   -- enh (keith) Lift Falcon V4 max group size to match latest firmware
+   -- enh (dkulp) Add twinkly output upload to FPP
+   -- enh (dkulp) Merge artnet multi-lines to one when uploading to FPP
+   -- enh (scott) Added the Ability to define "Preset" channel values when render non DMX Effects on a DMX model
+   -- enh (keith) When a ruler is defined on import or export of some model types save the real world dimensions 
+                  in the xmodel file and apply them when loading it
+   -- enh (keith) Add an option to silence the audio in xLights
+   -- bug (scott) Fix faces effect required a minimum of 10 states
+   -- bug (scott) Fix default gamma not saving
+   -- bug (keith) Fix twinkly model data import imports upside down
+   -- bug (dkulp) Abort render whenever a model group is changed
+   -- bug (keith) Abort render whenever a timing track is deleted or renamed
+   -- bug (keith) If there is no LUA mime handler use the txt handler instead
+2022.11 May 21, 2022
+   -- enh (scott) Added Load from State to DMX Effect
+   -- enh (scott) Add import from SVG to Sketch Assistant Panel
+   -- bug (dkulp) Fix toolbars/images on Windows with non-100% scaling (WIP)
+   -- bug (dkulp) Fix drag/drop in Import Dialog on MacOS
+   -- bug (dkulp) Fix video stream of exported House Videos if codec has to change from defaults
+   -- bug (dkulp) Maybe fix green video export on MacOS
+   -- bug (dkulp) Change how buttons with background colors set are drawn on MacOS
+   -- bug (dkulp) Fix hang with drag/drop of Faces Effect
+   -- bug (dkulp) Fix a crash situation if a buffer is reported as being larger than it actually is
+   -- bug (keith) Fix a possible OpenGL crash  if context cannot be created
 2022.10 May 15, 2022
    -- enh (aarcangeli/keith) Add support for Twinkly controllers including discovery
    -- enh (keith) Add ability to import Twinkly pixel layout into a custom model

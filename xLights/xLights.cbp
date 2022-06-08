@@ -1096,6 +1096,10 @@
 		<Unit filename="models/CustomModel.h" />
 		<Unit filename="models/DMX/DmxColorAbility.cpp" />
 		<Unit filename="models/DMX/DmxColorAbility.h" />
+		<Unit filename="models/DMX/DmxColorAbilityRGB.cpp" />
+		<Unit filename="models/DMX/DmxColorAbilityRGB.h" />
+		<Unit filename="models/DMX/DmxColorAbilityWheel.cpp" />
+		<Unit filename="models/DMX/DmxColorAbilityWheel.h" />
 		<Unit filename="models/DMX/DmxFloodArea.cpp" />
 		<Unit filename="models/DMX/DmxFloodArea.h" />
 		<Unit filename="models/DMX/DmxFloodlight.cpp" />
@@ -1112,6 +1116,8 @@
 		<Unit filename="models/DMX/DmxMovingHead3D.h" />
 		<Unit filename="models/DMX/DmxPanTiltAbility.cpp" />
 		<Unit filename="models/DMX/DmxPanTiltAbility.h" />
+		<Unit filename="models/DMX/DmxPresetAbility.cpp" />
+		<Unit filename="models/DMX/DmxPresetAbility.h" />
 		<Unit filename="models/DMX/DmxServo.cpp" />
 		<Unit filename="models/DMX/DmxServo.h" />
 		<Unit filename="models/DMX/DmxServo3D.cpp" />

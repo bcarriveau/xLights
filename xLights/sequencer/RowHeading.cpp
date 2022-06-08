@@ -115,9 +115,9 @@ RowHeading::RowHeading(MainSequencer* parent, wxWindowID id, const wxPoint &pos,
 #else
     bool exact = true;
 #endif
-    papagayo_icon = BitmapCache::GetPapgayoIcon(tooltip, 16, exact);
-    papagayox_icon = BitmapCache::GetPapgayoXIcon(tooltip, 16, exact);
-    model_group_icon = BitmapCache::GetModelGroupIcon(tooltip, 16, exact);
+    papagayo_icon = BitmapCache::GetPapgayoIcon();
+    papagayox_icon = BitmapCache::GetPapgayoXIcon();
+    model_group_icon = BitmapCache::GetModelGroupIcon();
     mCanPaste = false;
 
     wxConfigBase* config = wxConfigBase::Get();
@@ -720,6 +720,7 @@ void RowHeading::OnLayerPopup(wxCommandEvent& event)
             DisplayError("Timing name already exists in sequence as a model or another timing.");
         }
         else if (name.size() > 0) {
+            mSequenceElements->GetXLightsFrame()->AbortRender(); // stop rendering in case there is an effect referring to the timing track we are about to rename
             std::string oldname = element->GetName();
             mSequenceElements->GetXLightsFrame()->RenameTimingElement(oldname, name);
         }
@@ -730,6 +731,7 @@ void RowHeading::OnLayerPopup(wxCommandEvent& event)
 
         int answer = wxMessageBox(prompt, caption, wxYES_NO);
         if (answer == wxYES) {
+            mSequenceElements->GetXLightsFrame()->AbortRender(); // stop rendering in case there is an effect referring to the timing track we are about to delete
             mSequenceElements->DeleteElement(element->GetModelName());
             wxCommandEvent eventRowHeaderChanged(EVT_ROW_HEADINGS_CHANGED);
             wxPostEvent(GetParent(), eventRowHeaderChanged);
@@ -1575,7 +1577,7 @@ void RowHeading::Draw()
             Model* m = mSequenceElements->GetXLightsFrame()->AllModels[rowInfo->element->GetModelName()];
             if (m != nullptr) {
                 if (m->GetDisplayAs() == "ModelGroup") {
-                    dc.DrawBitmap(model_group_icon, getWidth() - ICON_SPACE, startY + 3, true);
+                    dc.DrawBitmap(model_group_icon.GetBitmapFor(this), getWidth() - ICON_SPACE, startY + 3, true);
                 } else if (StartsWith(m->GetStringType(), "Single Color") || m->GetStringType() == "Node Single Color") {
                     if (m->GetNodeCount() > 0) {
                         xlColor color;
@@ -1613,9 +1615,9 @@ void RowHeading::Draw()
                 dc.SetPen(penOutline);
                 dc.SetBrush(brush2);
                 if (rowInfo->element->GetEffectLayerCount() == 2) {
-                    dc.DrawBitmap(papagayox_icon, getWidth() - ICON_SPACE, startY + 3, true);
+                    dc.DrawBitmap(papagayox_icon.GetBitmapFor(this), getWidth() - ICON_SPACE, startY + 3, true);
                 } else if (rowInfo->element->GetEffectLayerCount() > 2) {
-                    dc.DrawBitmap(papagayo_icon, getWidth() - ICON_SPACE, startY + 3, true);
+                    dc.DrawBitmap(papagayo_icon.GetBitmapFor(this), getWidth() - ICON_SPACE, startY + 3, true);
                 }
             }
         }
